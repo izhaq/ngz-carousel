@@ -14,12 +14,14 @@ export class CarouselService {
   private _hiddenItems = 0;
   private _itemsPerClick = 1;
   private _items: Array<any>;
+  private _adjustable;
 
   constructor() {
   }
 
   calculate() {
-    this.setVisibleItems(true);
+    this.setVisibleItems();
+    this.setItemsPerClick();
     this.setCarouselItemWidth();
     this.setContentWidth();
     this.setOffset();
@@ -27,7 +29,8 @@ export class CarouselService {
 
   onResize() {
     this.setHiddenItems();
-    this.setVisibleItems(true);
+    this.setVisibleItems();
+    this.setItemsPerClick();
     this.setCarouselItemWidth();
     this.setContentWidth();
     this.setOffsetOnResize();
@@ -72,8 +75,8 @@ export class CarouselService {
     return this._visibleItems;
   }
 
-  setVisibleItems(auto: boolean, visibleItems?: any) {
-    if (auto) {
+  setVisibleItems(visibleItems?: any) {
+    if (this._adjustable) {
       this._visibleItems = Math.floor(this._viewPortWidth / this._maxCarouselItemWidth);
     } else {
       this._visibleItems = visibleItems;
@@ -140,6 +143,20 @@ export class CarouselService {
 
   set itemsPerClick(value: number) {
     this._itemsPerClick = value;
+  }
+
+  setItemsPerClick() {
+    if (this._adjustable) {
+      this._itemsPerClick = this._visibleItems;
+    }
+  }
+
+  get adjustable() {
+    return this._adjustable;
+  }
+
+  set adjustable(value: boolean) {
+    this._adjustable = value;
   }
 
   setContentWidth() {

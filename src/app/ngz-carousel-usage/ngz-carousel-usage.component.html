@@ -2,7 +2,7 @@
 <div class="remove" (click)="items.pop()">-</div>
 
 <ngz-carousel [items]="items">
-  <ng-container *ngFor="let item of items">
-    <div *ngzCarouselItem class="square-blue"></div>
+  <ng-container *ngFor="let item of items; let i = index">
+    <div *ngzCarouselItem class="square-blue">{{i+1}}</div>
   </ng-container>
 </ngz-carousel>

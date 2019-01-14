@@ -31,6 +31,7 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   @Input() maximumCarouselWidth = 150;
   @Input() itemsPerClick = 4;
   @Input() timing = '250ms ease-in';
+  @Input() adjustable = true;
 
   @ContentChild(CarouselItemDirective, {read: TemplateRef}) carouselItemTemplate;
   @ContentChildren(CarouselItemDirective) carouselItems: QueryList<CarouselItemDirective>;
@@ -50,6 +51,7 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   }
 
   initCarousel() {
+    this.service.adjustable = this.adjustable;
     this.service.itemsPerClick = this.itemsPerClick;
     this.service.viewPortWidth = this.carouselView.nativeElement.getBoundingClientRect().width;
     this.service.maxCarouselItemWidth = this.maximumCarouselWidth;
