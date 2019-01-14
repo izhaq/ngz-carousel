@@ -1,0 +1,38 @@
+:host {
+  .ngz-carousel-container{
+    width: 100%;
+    display: flex;
+
+    .ngz-carousel-viewport{
+      width: 100%;
+      overflow: hidden;
+      .ngz-carousel-content{
+        display: flex;
+        width: 1200px;
+        overflow: hidden;
+        position: relative;
+        .transition {
+          transition: all .4s ease-in-out;
+        }
+      }
+    }
+    .next, .prev{
+      display: flex;
+      height: 100%;
+      width: 30px;
+      justify-content: center;
+      align-items: center;
+      display: none;
+    }
+
+    &.show-prev-next-buttons{
+      .slider-viewport{
+        width: calc(100% - 60px);
+      }
+
+      .next, .prev{
+        display: flex;
+      }
+    }
+  }
+}
