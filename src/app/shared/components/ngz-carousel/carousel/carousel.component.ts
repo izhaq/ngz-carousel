@@ -9,7 +9,7 @@ import {
   TemplateRef,
   ViewChild,
   ViewChildren,
-  Renderer2, OnChanges, SimpleChanges
+  Renderer2, OnChanges, SimpleChanges, OnInit, ChangeDetectorRef, Output, EventEmitter
 } from '@angular/core';
 
 import {CarouselItemDirective} from './carousel-item/carousel-item.directive';
@@ -23,7 +23,7 @@ import {CarouselService} from './services/carousel.service';
   templateUrl: './carousel.component.html',
   styleUrls: ['./carousel.component.scss']
 })
-export class CarouselComponent implements AfterViewInit, OnChanges {
+export class CarouselComponent implements AfterViewInit, OnChanges, OnInit {
 
   @Input() items: any[] = [];
   @Input() visibleItems = 5;
@@ -32,6 +32,8 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   @Input() itemsPerClick = 4;
   @Input() timing = '250ms ease-in';
   @Input() adjustable = true;
+
+  @Output() updatedEdges = new EventEmitter<{leftEdge: number, rightEdge: number}>();
 
   @ContentChild(CarouselItemDirective, {read: TemplateRef}) carouselItemTemplate;
   @ContentChildren(CarouselItemDirective) carouselItems: QueryList<CarouselItemDirective>;
@@ -42,7 +44,18 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   private player: AnimationPlayer;
 
 
-  constructor(private renderer: Renderer2, private builder: AnimationBuilder, private service: CarouselService) {
+  constructor(private renderer: Renderer2, private builder: AnimationBuilder, private service: CarouselService,
+              private ref: ChangeDetectorRef) {
+  }
+
+  ngOnInit(): void {
+    this.service.adjustable = this.adjustable;
+    this.service.itemsPerClick = this.itemsPerClick;
+    this.service.viewPortWidth = this.carouselView.nativeElement.getBoundingClientRect().width;
+    this.service.maxCarouselItemWidth = this.maximumCarouselWidth;
+    this.service.items = this.items;
+    this.service.init();
+    this.notify();
   }
 
   ngAfterViewInit(): void {
@@ -51,13 +64,8 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   }
 
   initCarousel() {
-    this.service.adjustable = this.adjustable;
-    this.service.itemsPerClick = this.itemsPerClick;
     this.service.viewPortWidth = this.carouselView.nativeElement.getBoundingClientRect().width;
-    this.service.maxCarouselItemWidth = this.maximumCarouselWidth;
-    this.service.items = this.items;
-
-    this.service.calculate();
+    this.service.init();
     this.refreshStyles();
     this.playAnimation();
   }
@@ -67,6 +75,8 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
     this.service.onResize();
     this.refreshStyles();
     this.playAnimation();
+    this.notify();
+    this.ref.detectChanges();
   }
 
   refreshStyles() {
@@ -80,12 +90,19 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
   }
 
   playAnimation() {
+    console.log('translateX: ', this.service.offset);
+    /*this.renderer.setStyle(this.carouselContent.nativeElement, 'transform', `translateX(${this.service.offset}px)`);
+*/
     const myAnimation: AnimationFactory = this.builder.build([
       animate(this.timing, style({transform: `translateX(${this.service.offset}px)`}))
     ]);
 
     this.player = myAnimation.create(this.carouselContent.nativeElement);
     this.player.play();
+  }
+
+  notify() {
+    this.updatedEdges.emit({leftEdge: this.service.leftViewItemIndex, rightEdge: this.service.rightViewItemIndex});
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,6 +117,7 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
     if (this.service.isNextAllowed()) {
       this.service.onNext();
       this.playAnimation();
+      this.notify();
     }
   }
 
@@ -107,6 +125,7 @@ export class CarouselComponent implements AfterViewInit, OnChanges {
     if (this.service.isPrevAllowed()) {
       this.service.onPrev();
       this.playAnimation();
+      this.notify();
     }
   }
 

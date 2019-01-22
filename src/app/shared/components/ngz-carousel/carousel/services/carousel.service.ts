@@ -15,33 +15,40 @@ export class CarouselService {
   private _itemsPerClick = 1;
   private _items: Array<any>;
   private _adjustable;
+  private _leftViewItemIndex = 0;
+  private _rightViewItemIndex = 0;
 
   constructor() {
   }
 
-  calculate() {
-    this.setVisibleItems();
-    this.setItemsPerClick();
-    this.setCarouselItemWidth();
-    this.setContentWidth();
+  init() {
+    this.calculate();
     this.setOffset();
+    this.initEdges();
   }
 
   onResize() {
+    this.calculate();
+    this.setEdgesOnResize();
+    this.setOffsetOnResize();
+  }
+
+  calculate() {
     this.setHiddenItems();
     this.setVisibleItems();
     this.setItemsPerClick();
     this.setCarouselItemWidth();
     this.setContentWidth();
-    this.setOffsetOnResize();
   }
 
   onNext() {
     this.setOffsetOnNext();
+    this.setEdgesOnNext();
   }
 
   onPrev() {
     this.setOffsetOnPrev();
+    this.setEdgesOnPrev();
   }
 
   isNextAllowed(): boolean {
@@ -57,6 +64,39 @@ export class CarouselService {
       return false;
     }
     return true;
+  }
+
+  initEdges() {
+    this._rightViewItemIndex = this._items.length - 1;
+    this._leftViewItemIndex = this._rightViewItemIndex - this._visibleItems + 1;
+  }
+
+  setEdgesOnResize() {
+    this._rightViewItemIndex = this._leftViewItemIndex + this._visibleItems - 1;
+  }
+
+  setEdgesOnNext() {
+    this._rightViewItemIndex += this._itemsPerClick;
+    if (this._rightViewItemIndex >= this.items.length) {
+      this._rightViewItemIndex = this.items.length - 1;
+    }
+    this._leftViewItemIndex = this._rightViewItemIndex - this._visibleItems + 1;
+  }
+
+  setEdgesOnPrev() {
+    this._leftViewItemIndex -= this._itemsPerClick;
+    if (this._leftViewItemIndex < 0) {
+      this._leftViewItemIndex = 0;
+    }
+    this._rightViewItemIndex = this._leftViewItemIndex + this._visibleItems - 1;
+  }
+
+  get  leftViewItemIndex() {
+    return this._leftViewItemIndex;
+  }
+
+  get rightViewItemIndex() {
+    return this._rightViewItemIndex;
   }
 
   setHiddenItems() {

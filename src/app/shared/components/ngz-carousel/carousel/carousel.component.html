@@ -1,6 +1,10 @@
 <div class="ngz-carousel-container" [ngClass]="{'show-prev-next-buttons': showPrevNextButtons}">
   <div class="prev" (click)="prev()"><</div>
   <div class="ngz-carousel-viewport" #carouselViewPort>
+    <div style="display: flex; width: 100%; height: 50px">
+      <div style="display: flex; width: 50%;">{{service.leftViewItemIndex}}</div>
+      <div style="display: flex; width: 50%;">{{service.rightViewItemIndex}}</div>
+    </div>
     <div class="ngz-carousel-content" #carouselContent (panmove)="onPan($event)" (swipeleft)="next()" (swiperight)="prev()">
       <div class="ngz-carousel-selector transition" *ngFor="let item of carouselItems; let i = index">
         <!--<ng-container *ngTemplateOutlet="item.tpl; context: {$implicit: items.length > i && items[i]}"></ng-container>-->
